@@ -1,7 +1,8 @@
 # Telegram Client
 
-## For MacOS (manual steps)
+## For MacOS
 
+### Manual steps
 - java/scala installed
 - cd to the project dir
 - `xcode-select --install`
@@ -20,6 +21,10 @@
 - `cd build`
 - `cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX:PATH=../../../tdlib -DTd_DIR:PATH=$(greadlink -e ../td/lib/cmake/Td) ..`
 - `cmake --build . --target install`
+
+### Or using SBT
+
+`sbt buildTdLib`
 
 ### For Windows (not tested well)
 

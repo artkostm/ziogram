@@ -1,11 +1,28 @@
 import sbt._
 import os._
 
+import scala.collection.immutable
+import scala.util.matching.Regex
+
 object TdLib {
 
   lazy val buildTdLib = taskKey[Unit]("Build tdlib native library and java wrapper")
 
-  case object MacOs extends Builder {
+  def buildTdLibImpl: Unit = {
+    platform.Platform() match {
+      case Some(p) =>
+        TdLib.builders.get(p).foreach(_.build())
+      case None => throw new RuntimeException("Cannot recognize os name or os arch!")
+    }
+  }
+
+  private val builders: Map[platform.Platform, Builder] =
+    Map(
+      platform.Platform.Mac     -> MacOs,
+      platform.Platform.Windows -> Windows
+    )
+
+  private case object MacOs extends Builder {
     override def build(): Path = {
 
       if (!exists(FS.Lib) || list(FS.Lib).isEmpty) {
@@ -35,7 +52,6 @@ object TdLib {
           ".."
         ).call(cwd = FS.ExampleBuild, stdout = Inherit, stderr = Inherit)
 
-
         proc("cmake", "--build", ".", "--target", "install")
           .call(cwd = FS.ExampleBuild, stdout = Inherit, stderr = Inherit)
 
@@ -48,24 +64,47 @@ object TdLib {
     }
   }
 
-  case object Windows extends Builder {
+  private case object Windows extends Builder {
     override def build(): Path = {
       println("Sorry, will be implemented soon!")
       FS.ExampleBuild
     }
   }
 
-  object FS {
-    val Root         = pwd
-    val TdLib        = Root / "tdlib"
-    val Lib          = Root / "lib"
-    val Build        = TdLib / "build"
-    val Example      = TdLib / "example" / "java"
-    val ExampleBuild = Example / "build"
-    val TdLibBin     = TdLib / "tdlib" / "bin"
+  private object FS {
+    val Root: Path         = pwd
+    val TdLib: Path        = Root / "tdlib"
+    val Lib: Path          = Root / "lib"
+    val Build: Path        = TdLib / "build"
+    val Example: Path      = TdLib / "example" / "java"
+    val ExampleBuild: Path = Example / "build"
+    val TdLibBin: Path     = TdLib / "tdlib" / "bin"
   }
 
-  trait Builder {
+  sealed trait Builder {
     def build(): Path
+  }
+}
+
+object platform {
+  import enumeratum._
+
+  abstract sealed class Platform(val osArch: Map[Regex, Regex]) extends EnumEntry
+
+  object Platform extends Enum[Platform] {
+    case object Mac     extends Platform(Map("^.*(mac|darwin).*$".r -> ".*".r))
+    case object Windows extends Platform(Map())
+
+    override def values: immutable.IndexedSeq[Platform] = findValues
+
+    def apply(): Option[Platform] =
+      for {
+        name <- sys.props.get("os.name")
+        arch <- sys.props.get("os.arch")
+        platform <- values.find(_.osArch.exists {
+                     case (os, ar) =>
+                       name.toLowerCase.matches(os.regex) && arch.toLowerCase.matches(ar.regex)
+                   })
+      } yield platform
   }
 }

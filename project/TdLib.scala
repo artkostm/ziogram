@@ -25,7 +25,7 @@ object TdLib {
   private case object MacOs extends Builder {
     override def build(): Path = {
 
-      if (!exists(FS.Lib) || list(FS.Lib).isEmpty) {
+      if (!exists(FS.Lib) || !exists(FS.Lib / jarFileName)) {
         remove.all(FS.Build)
         makeDir(FS.Build)
 
@@ -58,6 +58,7 @@ object TdLib {
         list(FS.TdLibBin).foreach(copy.matching {
           case _ / file => FS.Lib / file
         })
+        proc("jar", "cvf", jarFileName, ".").call(cwd = FS.Lib, stdout = Inherit, stderr = Inherit)
       }
 
       FS.TdLibBin
@@ -84,6 +85,8 @@ object TdLib {
   sealed trait Builder {
     def build(): Path
   }
+
+  private val jarFileName = "tdlib_1.0.jar"
 }
 
 object platform {
@@ -93,7 +96,7 @@ object platform {
 
   object Platform extends Enum[Platform] {
     case object Mac     extends Platform(Map("^.*(mac|darwin).*$".r -> ".*".r))
-    case object Windows extends Platform(Map())
+    case object Windows extends Platform(Map("^.*(windows).*$".r -> ".*".r))
 
     override def values: immutable.IndexedSeq[Platform] = findValues
 

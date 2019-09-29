@@ -1,6 +1,6 @@
-package org.chatanalysis
+package com.ziogram
 
-import org.chatanalysis.telegram.Telegram
+import com.ziogram.telegram.Telegram
 import zio.console._
 import zio.{App, Managed, ZIO}
 

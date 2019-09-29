@@ -1,4 +1,4 @@
-package org.chatanalysis
+package com.ziogram
 
 import org.drinkless.tdlib.TdApi
 import zio.{RIO, URIO, ZIO}

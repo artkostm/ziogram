@@ -4,9 +4,6 @@ import org.drinkless.tdlib.TdApi.TdlibParameters
 import org.drinkless.tdlib.example.Example
 
 object Test extends App {
-//  def registerNativeLibs(): Unit = System.load("tdjni")
-//
-//  registerNativeLibs()
 
   Example.main(Array("Example"))
   println("Libs loaded!")

@@ -1,6 +1,6 @@
-package org.chatanalysis.telegram
+package com.ziogram.telegram
 
-import org.chatanalysis.telegram.client.Client
+import com.ziogram.telegram.client.Client
 import org.drinkless.tdlib.TdApi
 import zio.{RIO, Task, UIO, URIO, ZIO}
 

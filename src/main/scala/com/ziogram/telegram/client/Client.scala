@@ -1,4 +1,4 @@
-package org.chatanalysis.telegram.client
+package com.ziogram.telegram.client
 
 import java.util.concurrent.atomic.AtomicLong
 

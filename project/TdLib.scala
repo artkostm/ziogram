@@ -26,20 +26,20 @@ object TdLib {
     override def build(): Path = {
 
       if (!exists(FS.Lib) || !exists(FS.Lib / jarFileName)) {
-        remove.all(FS.Build)
-        makeDir(FS.Build)
-
-        proc(
-          "cmake",
-          "-DCMAKE_BUILD_TYPE=Release",
-          "-DOPENSSL_ROOT_DIR=/usr/local/opt/openssl/",
-          "-DCMAKE_INSTALL_PREFIX:PATH=../example/java/td",
-          "-DTD_ENABLE_JNI=ON",
-          ".."
-        ).call(cwd = FS.Build, stdout = Inherit, stderr = Inherit)
-
-        proc("cmake", "--build", ".", "--target", "install")
-          .call(cwd = FS.Build, stdout = Inherit, stderr = Inherit)
+//        remove.all(FS.Build)
+//        makeDir(FS.Build)
+//
+//        proc(
+//          "cmake",
+//          "-DCMAKE_BUILD_TYPE=Release",
+//          "-DOPENSSL_ROOT_DIR=/usr/local/opt/openssl/",
+//          "-DCMAKE_INSTALL_PREFIX:PATH=../example/java/td",
+//          "-DTD_ENABLE_JNI=ON",
+//          ".."
+//        ).call(cwd = FS.Build, stdout = Inherit, stderr = Inherit)
+//
+//        proc("cmake", "--build", ".", "--target", "install")
+//          .call(cwd = FS.Build, stdout = Inherit, stderr = Inherit)
 
         remove.all(FS.ExampleBuild)
         makeDir(FS.ExampleBuild)

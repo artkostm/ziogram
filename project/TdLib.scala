@@ -8,13 +8,12 @@ object TdLib {
 
   lazy val buildTdLib = taskKey[Unit]("Build tdlib native library and java wrapper")
 
-  def buildTdLibImpl: Unit = {
+  def buildTdLibImpl(logger: util.Logger): Unit =
     platform.Platform() match {
       case Some(p) =>
-        TdLib.builders.get(p).foreach(_.build())
+        TdLib.builders.get(p).foreach(_.build(logger))
       case None => throw new RuntimeException("Cannot recognize os name or os arch!")
     }
-  }
 
   private val builders: Map[platform.Platform, Builder] =
     Map(
@@ -23,11 +22,11 @@ object TdLib {
     )
 
   private case object MacOs extends Builder {
-    override def build(): Path = {
+    override def build(logger: util.Logger): Path = {
 
-      if (!exists(FS.Lib) || !exists(FS.Lib / jarFileName)) {
-        remove.all(FS.Build)
-        makeDir(FS.Build)
+      if (!exists(FS.LibBinFile)) {
+        remove.all(FS.TdBuild)
+        makeDir(FS.TdBuild)
 
         proc(
           "cmake",
@@ -36,57 +35,51 @@ object TdLib {
           "-DCMAKE_INSTALL_PREFIX:PATH=../example/java/td",
           "-DTD_ENABLE_JNI=ON",
           ".."
-        ).call(cwd = FS.Build, stdout = Inherit, stderr = Inherit)
+        ).call(cwd = FS.TdBuild, stdout = Inherit, stderr = Inherit)
 
         proc("cmake", "--build", ".", "--target", "install")
-          .call(cwd = FS.Build, stdout = Inherit, stderr = Inherit)
+          .call(cwd = FS.TdBuild, stdout = Inherit, stderr = Inherit)
 
-        remove.all(FS.ExampleBuild)
-        makeDir(FS.ExampleBuild)
+        remove.all(FS.NativeBuild)
+        makeDir(FS.NativeBuild)
 
         proc(
           "cmake",
           "-DCMAKE_BUILD_TYPE=Release",
-          "-DCMAKE_INSTALL_PREFIX:PATH=../../../tdlib",
+          "-DCMAKE_INSTALL_PREFIX:PATH=../../../native",
           "-DTd_DIR:PATH=" + (FS.Example / "td" / "lib" / "cmake" / "Td").toString(),
+          "-DBINDINGS_SOURCE_DIR=../../main/java",
+          "-DTD_SOURCE_DIR=" + FS.Example.toString(),
           ".."
-        ).call(cwd = FS.ExampleBuild, stdout = Inherit, stderr = Inherit)
+        ).call(cwd = FS.NativeBuild, stdout = Inherit, stderr = Inherit)
 
         proc("cmake", "--build", ".", "--target", "install")
-          .call(cwd = FS.ExampleBuild, stdout = Inherit, stderr = Inherit)
-
-        list(FS.TdLibBin).foreach(copy.matching {
-          case _ / file => FS.Lib / file
-        })
-        proc("jar", "cvf", jarFileName, ".").call(cwd = FS.Lib, stdout = Inherit, stderr = Inherit)
+          .call(cwd = FS.NativeBuild, stdout = Inherit, stderr = Inherit)
       }
 
-      FS.TdLibBin
+      FS.LibBinFile
     }
   }
 
   private case object Windows extends Builder {
-    override def build(): Path = {
-      println("Sorry, will be implemented soon!")
-      FS.ExampleBuild
+    override def build(logger: util.Logger): Path = {
+      logger.warn("Sorry, will be implemented soon!")
+      FS.LibBinFile
     }
   }
 
   private object FS {
-    val Root: Path         = pwd
-    val TdLib: Path        = Root / "tdlib"
-    val Lib: Path          = Root / "lib"
-    val Build: Path        = TdLib / "build"
+    val Root: Path         = pwd / "src" / "native"
+    val NativeBuild        = Root / "build"
+    val TdLib: Path        = Root / "td"
+    val LibBinFile: Path          = pwd / "native" / "bin" / System.mapLibraryName("tdjni")
+    val TdBuild: Path      = TdLib / "build"
     val Example: Path      = TdLib / "example" / "java"
-    val ExampleBuild: Path = Example / "build"
-    val TdLibBin: Path     = TdLib / "tdlib" / "bin"
   }
 
   sealed trait Builder {
-    def build(): Path
+    def build(logger: util.Logger): Path
   }
-
-  private val jarFileName = "tdlib_1.0.jar"
 }
 
 object platform {
@@ -96,7 +89,7 @@ object platform {
 
   object Platform extends Enum[Platform] {
     case object Mac     extends Platform(Map("^.*(mac|darwin).*$".r -> ".*".r))
-    case object Windows extends Platform(Map("^.*(windows).*$".r -> ".*".r))
+    case object Windows extends Platform(Map("^.*(windows).*$".r    -> ".*".r))
 
     override def values: immutable.IndexedSeq[Platform] = findValues
 

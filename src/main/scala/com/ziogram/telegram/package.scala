@@ -1,6 +1,6 @@
 package com.ziogram
 
-import org.drinkless.tdlib.TdApi
+import com.ziogram.telegram.client.TdApi
 import zio.{RIO, URIO, ZIO}
 
 package object telegram extends Telegram.Service[Telegram] {

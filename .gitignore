@@ -91,4 +91,4 @@ Module.symvers
 Mkfile.old
 dkms.conf
 target
-
+**/build/**

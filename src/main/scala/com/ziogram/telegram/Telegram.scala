@@ -1,7 +1,7 @@
 package com.ziogram.telegram
 
-import com.ziogram.telegram.client.Client
-import org.drinkless.tdlib.TdApi
+import com.ziogram.telegram.client.TelegramClient
+import com.ziogram.telegram.client.TdApi
 import zio.{RIO, Task, UIO, URIO, ZIO}
 
 trait Telegram {
@@ -17,7 +17,7 @@ object Telegram {
   }
 
   trait Live extends Telegram {
-    protected[Telegram] val inner: Client
+    protected[Telegram] val inner: TelegramClient
 
     override val client: Service[Any] = new Service[Any] {
 
@@ -40,7 +40,7 @@ object Telegram {
 
     def apply(): Task[Telegram] =
       ZIO.effect(new Live {
-        override protected[Telegram] val inner: Client = Client()
+        override protected[Telegram] val inner: TelegramClient = TelegramClient()
       })
   }
 }

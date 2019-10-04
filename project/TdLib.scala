@@ -69,12 +69,12 @@ object TdLib {
   }
 
   private object FS {
-    val Root: Path         = pwd / "src" / "native"
-    val NativeBuild        = Root / "build"
-    val TdLib: Path        = Root / "td"
-    val LibBinFile: Path          = pwd / "native" / "bin" / System.mapLibraryName("tdjni")
-    val TdBuild: Path      = TdLib / "build"
-    val Example: Path      = TdLib / "example" / "java"
+    val Root: Path       = pwd / "src" / "native"
+    val NativeBuild      = Root / "build"
+    val TdLib: Path      = Root / "td"
+    val LibBinFile: Path = pwd / "native" / "bin" / System.mapLibraryName("tdjni")
+    val TdBuild: Path    = TdLib / "build"
+    val Example: Path    = TdLib / "example" / "java"
   }
 
   sealed trait Builder {
